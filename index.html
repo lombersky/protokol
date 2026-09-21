@@ -1,0 +1,756 @@
+<title>Protokol</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F3F2F7; --card:#FFFFFF; --card-2:#F7F6FB; --line:#DEDCE8; --line-soft:#EBEAF2;
+  --ink:#191823; --ink-2:#4A4860; --dim:#797791;
+  --accent:#4B46A0; --accent-soft:#E9E8F7; --on-accent:#FFFFFF;
+  --good:#2C7355; --good-soft:#E2F0EA;
+  --bad:#A83F39; --bad-soft:#F9E7E6;
+  --warm:#9E600F; --warm-soft:#F8EFE1;
+  --shadow:0 1px 2px rgba(25,24,35,.06),0 8px 22px -14px rgba(25,24,35,.3);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#131219; --card:#1C1B24; --card-2:#23222D; --line:#33313F; --line-soft:#282732;
+  --ink:#ECEBF2; --ink-2:#C2C0D2; --dim:#918FA6;
+  --accent:#9E99EC; --accent-soft:#282640; --on-accent:#16151E;
+  --good:#63BE93; --good-soft:#1B2E26;
+  --bad:#E4837D; --bad-soft:#342221;
+  --warm:#E2A55C; --warm-soft:#342A1D;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -16px rgba(0,0,0,.9);
+}}
+:root[data-theme="dark"]{
+  --bg:#131219; --card:#1C1B24; --card-2:#23222D; --line:#33313F; --line-soft:#282732;
+  --ink:#ECEBF2; --ink-2:#C2C0D2; --dim:#918FA6;
+  --accent:#9E99EC; --accent-soft:#282640; --on-accent:#16151E;
+  --good:#63BE93; --good-soft:#1B2E26;
+  --bad:#E4837D; --bad-soft:#342221;
+  --warm:#E2A55C; --warm-soft:#342A1D;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -16px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);margin:0;
+  font-family:"Archivo",-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 96px}
+h1{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin:0}
+h2{font-size:1rem;font-weight:700;letter-spacing:-.01em;margin:0}
+h3{font-size:.9rem;font-weight:700;margin:0}
+p{margin:0}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.dim{color:var(--dim)}
+.hidden{display:none!important}
+
+/* hlavička + fáze */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.phase{display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--accent);
+  border-radius:999px;padding:6px 12px;font-family:"IBM Plex Mono",monospace;font-size:.72rem;font-weight:600;letter-spacing:.04em}
+.phase .arm{background:var(--accent);color:var(--on-accent);border-radius:999px;padding:1px 8px}
+.datepick{display:flex;align-items:center;gap:6px;margin:10px 0 16px}
+.datepick button{background:var(--card);border:1px solid var(--line);color:var(--ink-2);
+  width:38px;height:38px;border-radius:10px;font-size:1.05rem;cursor:pointer;line-height:1}
+.datepick .d{font-family:"IBM Plex Mono",monospace;font-size:.9rem;color:var(--ink);flex:1;text-align:center}
+.datepick .d small{display:block;color:var(--dim);font-size:.72rem}
+
+/* karty */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px 4px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card.pad{padding-bottom:14px}
+.card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.card-h .n{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.rule{font-size:.78rem;color:var(--dim);margin-top:-2px;margin-bottom:8px}
+
+/* položka */
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.item:last-child{border-bottom:none}
+.item .lab{font-size:.95rem;font-weight:600;color:var(--ink)}
+.item .hint{font-size:.76rem;color:var(--dim);font-weight:400;margin-top:1px}
+.item .hint.ok{color:var(--good)} .item .hint.no{color:var(--bad)}
+.item.stack{flex-direction:column;align-items:stretch;gap:8px}
+
+/* ovládací prvky */
+.tri{display:flex;gap:5px;flex:none}
+.tri button,.scale button,.opt{border:1px solid var(--line);background:var(--card-2);color:var(--dim);
+  min-width:44px;height:40px;border-radius:10px;font-size:.84rem;font-weight:700;font-family:inherit;cursor:pointer;padding:0 11px}
+.tri button[aria-pressed="true"].y{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.tri button[aria-pressed="true"].n{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.scale{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.scale button{min-width:34px;width:34px;padding:0}
+.scale button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.scale.pain button[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--on-accent)}
+.opts{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.opt[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.opt.auto{opacity:.6}
+input[type=time],input[type=number],input[type=text],input[type=date]{background:var(--card-2);border:1px solid var(--line);border-radius:10px;
+  color:var(--ink);font-family:inherit;font-size:1rem;padding:9px 10px;min-height:40px}
+input[type=time]{width:112px;font-family:"IBM Plex Mono",monospace;font-weight:600}
+input[type=number]{width:84px;text-align:center;font-family:"IBM Plex Mono",monospace;font-weight:700}
+input[type=text]{width:100%;font-size:.94rem}
+textarea{width:100%;background:var(--card-2);border:1px solid var(--line);border-radius:10px;
+  color:var(--ink);font-family:inherit;font-size:.94rem;padding:10px;resize:vertical;min-height:56px}
+button:focus-visible,input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.quick button{border:1px solid var(--line);background:var(--card-2);color:var(--ink-2);border-radius:999px;
+  padding:6px 11px;font-size:.78rem;font-weight:600;font-family:inherit;cursor:pointer}
+.quick button.clr{color:var(--bad)}
+.alc-total{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:1.05rem;color:var(--ink)}
+
+.btn{display:block;width:100%;border:none;border-radius:12px;padding:14px;font-family:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;background:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:var(--card);color:var(--ink-2);border:1px solid var(--line)}
+.btn.warn{background:var(--bad-soft);color:var(--bad);border:1px solid var(--bad)}
+.btn:active{opacity:.85}
+.btn+.btn{margin-top:8px}
+.msg{font-size:.84rem;color:var(--dim);text-align:center;margin-top:10px;min-height:18px}
+.msg.ok{color:var(--good)} .msg.err{color:var(--bad)}
+
+/* upozornění */
+.note{border-radius:11px;padding:11px 13px;font-size:.85rem;line-height:1.45;color:var(--ink-2);margin-bottom:12px}
+.note.warm{background:var(--warm-soft);border:1px solid var(--warm)} .note.warm b{color:var(--warm)}
+.note.bad{background:var(--bad-soft);border:1px solid var(--bad)} .note.bad b{color:var(--bad)}
+.note.acc{background:var(--accent-soft);border:1px solid var(--accent)} .note.acc b{color:var(--accent)}
+
+/* týden */
+table{border-collapse:collapse;width:100%;font-size:.82rem}
+th{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  text-align:right;padding:6px 4px;border-bottom:1px solid var(--line);font-weight:600}
+th:first-child,td:first-child{text-align:left}
+td{padding:8px 4px;border-bottom:1px solid var(--line-soft);text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+td:first-child{font-family:"Archivo",sans-serif;font-weight:600;color:var(--ink)}
+td.cur{color:var(--ink);font-weight:700}
+tr:last-child td{border-bottom:none}
+.bars{display:flex;gap:4px;align-items:flex-end;height:64px;margin:8px 0 2px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar i{display:block;width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px}
+.bar i.we{background:var(--warm)}
+.bar span{font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:var(--dim)}
+.bar b{font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--ink-2);font-weight:600}
+
+/* fáze */
+.ph{padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.ph:last-child{border-bottom:none}
+.ph .t{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.ph .t b{font-size:.95rem}
+.ph .t span{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--dim)}
+.ph ul{margin:6px 0 0;padding-left:18px;font-size:.84rem;color:var(--ink-2)}
+.ph.cur{background:var(--accent-soft);margin:0 -16px;padding:12px 16px;border-radius:10px}
+.ph.cur .t span{color:var(--accent)}
+
+/* úkoly */
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.task:last-child{border-bottom:none}
+.task input[type=checkbox]{width:24px;height:24px;margin-top:2px;flex:none;accent-color:var(--accent)}
+.task .tt{font-weight:600;font-size:.94rem}
+.task .td{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--dim);margin-top:2px}
+.task.done .tt{text-decoration:line-through;color:var(--dim)}
+.task .flag{margin-top:8px;background:var(--bad-soft);border-left:3px solid var(--bad);padding:8px 10px;border-radius:0 8px 8px 0;font-size:.8rem;color:var(--ink-2)}
+.task .flag.info{background:var(--warm-soft);border-left-color:var(--warm)}
+
+/* export */
+textarea.exp{font-family:"IBM Plex Mono",monospace;font-size:.7rem;min-height:120px}
+
+/* spodní lišta */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:5}
+.tabs button{flex:1;background:none;border:none;color:var(--dim);font-family:inherit;font-size:.7rem;font-weight:700;
+  padding:8px 2px;border-radius:10px;cursor:pointer;letter-spacing:.02em}
+.tabs button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft)}
+.foot{text-align:center;font-size:.74rem;color:var(--dim);margin-top:20px;line-height:1.6}
+
+@media (max-width:430px){
+  .item:not(.inline){flex-direction:column;align-items:stretch;gap:8px;padding:12px 0}
+  .tri,.scale,.opts{justify-content:stretch}
+  .tri button,.opt{flex:1;height:46px}
+  .scale button{flex:1;width:auto;height:44px}
+  input[type=time]{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<!-- ===================== DNES ===================== -->
+<section id="tab-dnes">
+  <div class="top">
+    <div><h1>Protokol</h1><p class="dim" style="font-size:.8rem;margin-top:2px">každé pole se ukládá samo</p></div>
+    <div class="phase" id="phaseBadge"></div>
+  </div>
+
+  <div class="datepick">
+    <button id="prevDay" aria-label="Předchozí den">‹</button>
+    <div class="d"><span id="dateStr"></span><small id="dayLabel"></small></div>
+    <button id="nextDay" aria-label="Další den">›</button>
+  </div>
+
+  <div id="storageWarn" class="note bad hidden"><b>Tenhle prohlížeč zápisy neukládá.</b> Po každém zápisu použijte Export, nebo stránku otevřete v Safari a přidejte na plochu.</div>
+  <div id="phaseRules" class="note acc"></div>
+
+  <div class="card">
+    <div class="card-h"><h2>Ráno</h2><span class="n">po probuzení</span></div>
+    <div id="secMorning"></div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h2>Den</h2><span class="n"></span></div>
+    <div id="secDay"></div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h2>Večer</h2><span class="n">před spaním</span></div>
+    <div id="secEvening"></div>
+  </div>
+  <div class="card" id="cardWeekend">
+    <div class="card-h"><h2>Pátek a sobota navíc</h2><span class="n">kovariáty víkendu</span></div>
+    <div id="secWeekend"></div>
+  </div>
+  <div class="card pad">
+    <div class="card-h"><h2>Poznámka</h2><span class="n">nepovinné</span></div>
+    <textarea id="note" placeholder="…"></textarea>
+  </div>
+  <p class="msg" id="saveMsg"></p>
+  <p class="foot" id="foot"></p>
+</section>
+
+<!-- ===================== TÝDEN ===================== -->
+<section id="tab-tyden" class="hidden">
+  <div class="top"><div><h1>Týden</h1><p class="dim" style="font-size:.8rem;margin-top:2px">uplynulý týden a tři předchozí</p></div></div>
+  <div id="weekBody"></div>
+</section>
+
+<!-- ===================== FÁZE ===================== -->
+<section id="tab-faze" class="hidden">
+  <div class="top"><div><h1>Fáze</h1><p class="dim" style="font-size:.8rem;margin-top:2px">tři proměnné, vše ostatní stálé</p></div></div>
+  <div class="card pad"><div id="phaseList"></div></div>
+  <div class="card pad">
+    <div class="card-h"><h2>Start protokolu</h2><span class="n">pondělí</span></div>
+    <div class="item inline"><div class="lab">Datum startu</div><input type="date" id="startDate"></div>
+    <div class="item inline"><div><div class="lab">Cílová váha</div><div class="hint">popisný výstup, ne test</div></div>
+      <div style="display:flex;align-items:center;gap:7px"><input type="number" step="0.1" inputmode="decimal" id="targetW" style="width:92px"><span class="dim" style="font-size:.82rem;font-weight:600">kg</span></div></div>
+    <div class="item inline"><div><div class="lab">Ruční posun fáze</div><div class="hint">jen když je důvod; jinak podle data</div></div>
+      <div class="opts" id="phaseOverride"></div></div>
+    <p class="dim" style="font-size:.78rem;margin-top:8px">Fáze 1 začíná datem startu; každá trvá 4 týdny. V testovacích fázích se rameno střídá po týdnech A‑B‑A‑B.</p>
+  </div>
+</section>
+
+<!-- ===================== ÚKOLY ===================== -->
+<section id="tab-ukoly" class="hidden">
+  <div class="top"><div><h1>Úkoly</h1><p class="dim" style="font-size:.8rem;margin-top:2px">jednorázově, mimo denní rutinu</p></div></div>
+  <div class="card pad"><div id="taskList"></div></div>
+</section>
+
+<!-- ===================== EXPORT ===================== -->
+<section id="tab-export" class="hidden">
+  <div class="top"><div><h1>Export</h1><p class="dim" style="font-size:.8rem;margin-top:2px">data zůstávají v telefonu</p></div></div>
+  <div class="card pad">
+    <button class="btn" id="expJson">Export JSON (úplný)</button>
+    <button class="btn ghost" id="expCsv">Export CSV (jeden řádek = den)</button>
+    <textarea id="expOut" class="exp hidden" readonly></textarea>
+    <p class="msg" id="expMsg"></p>
+  </div>
+  <div class="card pad">
+    <div class="card-h"><h2>Import ze zálohy</h2><span class="n">JSON</span></div>
+    <textarea id="impIn" placeholder="Vložte sem obsah JSON exportu…"></textarea>
+    <button class="btn ghost" id="impBtn" style="margin-top:8px">Načíst a sloučit</button>
+    <p class="msg" id="impMsg"></p>
+  </div>
+  <div class="card pad">
+    <button class="btn ghost" id="testBtn">Ověřit, že se data ukládají</button>
+    <p class="msg" id="testMsg"></p>
+  </div>
+</section>
+
+</div>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="dnes" aria-selected="true">Dnes</button>
+  <button role="tab" data-tab="tyden" aria-selected="false">Týden</button>
+  <button role="tab" data-tab="faze" aria-selected="false">Fáze</button>
+  <button role="tab" data-tab="ukoly" aria-selected="false">Úkoly</button>
+  <button role="tab" data-tab="export" aria-selected="false">Export</button>
+</nav>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= úložiště ================= */
+var KEY='protokol2.v1', memory={}, useLocal=true;
+try{ var t='__t'+Date.now(); localStorage.setItem(t,'1'); if(localStorage.getItem(t)!=='1') throw 0; localStorage.removeItem(t); }
+catch(e){ useLocal=false; }
+function load(k,d){ try{ var s=useLocal?localStorage.getItem(KEY+'.'+k):memory[k]; return s?JSON.parse(s):d; }catch(e){ return d; } }
+function save(k,v){ var s=JSON.stringify(v); try{ if(useLocal) localStorage.setItem(KEY+'.'+k,s); else memory[k]=s; return true; }catch(e){ memory[k]=s; return false; } }
+
+/* ================= datum ================= */
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function today(){ return iso(new Date()); }
+function anchor(s){ return new Date(s+'T12:00:00'); }
+function shift(s,n){ var d=anchor(s); d.setDate(d.getDate()+n); return iso(d); }
+function wd(s){ return (anchor(s).getDay()+6)%7; }           /* 0 = pondělí */
+function daysBetween(a,b){ return Math.round((anchor(b)-anchor(a))/86400000); }
+function monday(s){ return shift(s,-wd(s)); }
+var DNY=['pondělí','úterý','středa','čtvrtek','pátek','sobota','neděle'];
+var DNY_K=['Po','Út','St','Čt','Pá','So','Ne'];
+function fmt(s){ var p=s.split('-'); return +p[2]+'. '+ +p[1]+'.'; }
+function fmtFull(s){ var p=s.split('-'); return +p[2]+'. '+ +p[1]+'. '+p[0]; }
+function tmin(t){ if(!t) return null; var p=t.split(':'); return +p[0]*60 + +p[1]; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+/* ================= stav ================= */
+var settings=load('settings',{startDate:'2026-09-14', phaseOverride:null, targetWeightKg:80.0});
+if(settings.targetWeightKg==null){ settings.targetWeightKg=80.0; save('settings',settings); }
+var records=load('records',{});
+var tasks=load('tasks',null);
+var cur=today();
+
+/* ================= fáze ================= */
+var PHASES=[
+ {id:1,name:'Start',alt:false,lemon:'s citronem',meal:'půst do 12:00 (po ranním kole hned po jízdě)',
+  alcohol:'0 jednotek — suchý blok',primary:null,
+  bullets:['Alkohol 0 jednotek. Jediný zásah tak velký, že je poznat bez přístroje.','Citron ano. Půst do 12:00.','Nově: silový trénink 2×, světlo ráno, hořčík, kompletní zápis.','Vyhodnocení jen popisné.']},
+ {id:2,name:'Test snídaně',alt:true,armA:'bílkovinová snídaně do 2 h po probuzení',armB:'půst do 12:00',
+  lemon:'s citronem',alcohol:'max 2 dny/týden, max 3 j./den, žádný Ne–Čt',primary:'energy',primaryLabel:'energie',
+  bullets:['Střídání po týdnech A‑B‑A‑B.','A = bílkovinová snídaně do 2 h, B = půst do 12:00.','Primární výstup: energie 1–5.','Test je o načasování, ne o množství — celkový denní příjem zůstává zhruba stejný. Střídání zároveň ruší vliv pomalého trendu váhy.']},
+ {id:3,name:'Test citronu',alt:true,armA:'teplá voda bez citronu',armB:'teplá voda s citronem',
+  meal:'podle výsledku fáze 2',alcohol:'jako ve fázi 2',primary:'heartburn',primaryLabel:'žáha',
+  bullets:['Střídání po týdnech A‑B‑A‑B.','A = bez citronu, B = s citronem.','Primární výstup: žáha 0–3.']},
+ {id:4,name:'Trvalý protokol',alt:false,lemon:'podle výsledku fáze 3',meal:'podle výsledku fáze 2',alcohol:'jako ve fázi 2',primary:null,
+  bullets:['Zůstává, co vyšlo.','Test víkendového efektu (A/B pátky) se spouští jen s wearable.']}
+];
+function phaseFor(dateStr){
+  var days=daysBetween(settings.startDate,dateStr);
+  if(days<0) return {phase:null,week:0,arm:'none',weekInPhase:0,before:true};
+  var w=Math.floor(days/7);                        /* 0-based celkový týden */
+  var pid = settings.phaseOverride || Math.min(4, Math.floor(w/4)+1);
+  var wip = settings.phaseOverride ? (w%4) : (w - (pid-1)*4);
+  if(pid===4) wip = w-12;
+  var ph=PHASES[pid-1];
+  var arm = ph.alt ? (wip%2===0?'A':'B') : 'none';
+  return {phase:ph,week:w+1,weekInPhase:wip+1,arm:arm,before:false};
+}
+function mealRule(pf){
+  if(!pf.phase) return null;
+  if(pf.phase.id===2) return pf.arm==='A' ? 'protein' : 'fast';
+  return 'fast';
+}
+function lemonRule(pf){
+  if(!pf.phase) return null;
+  if(pf.phase.id===3) return pf.arm==='A' ? false : true;
+  return true;
+}
+
+function f1(x){ return x==null?'—':(Math.round(x*10)/10).toString().replace('.',','); }
+function fsign(x){ return x==null?'—':(x>0?'+':'')+f1(x); }
+function fw(x){ return x==null?'—':(Math.round(x*10)/10).toFixed(1).replace('.',','); }
+function fwsign(x){ return x==null?'—':(x>0?'+':'')+fw(x); }
+
+/* ================= záznamy ================= */
+function rec(d){ return records[d]||{}; }
+function setVal(d,k,v){
+  var e=records[d]||(records[d]={date:d});
+  if(v===null||v===undefined||v==='') delete e[k]; else e[k]=v;
+  e.updatedAt=new Date().toISOString();
+}
+function eveningDone(e){ return !!e && (e.energy!=null || e.mood!=null); }
+function numInput(k,step,unit,width){
+  var e=rec(cur), i=document.createElement('input'); i.type='number'; i.step=step; i.inputMode=step<1?'decimal':'numeric';
+  i.value=(e[k]==null?'':e[k]); i.placeholder='—'; if(width) i.style.width=width;
+  i.addEventListener('input',function(){ var v=i.value.replace(',','.'); setVal(cur,k, v===''?null:Math.round(parseFloat(v)*10)/10); touch(); });
+  i.addEventListener('blur',function(){ renderDay(); });
+  if(!unit) return i;
+  var w=document.createElement('div'); w.style.cssText='display:flex;align-items:center;gap:7px;flex:none';
+  w.appendChild(i); var u=document.createElement('span'); u.className='dim'; u.style.cssText='font-size:.82rem;font-weight:600'; u.textContent=unit; w.appendChild(u); return w;
+}
+function weightAvg(dateStr,days){
+  var v=[]; for(var i=0;i<(days||7);i++){ var e=records[shift(dateStr,-i)]; if(e&&e.weightKg!=null) v.push(e.weightKg); }
+  return v.length>=3 ? {avg:v.reduce(function(a,b){return a+b;},0)/v.length, n:v.length} : {avg:null,n:v.length};
+}
+function cbdMode(dateStr){
+  var pf=phaseFor(dateStr); if(!pf.phase) return null;
+  var c={}; Object.keys(records).forEach(function(d){ var e=records[d]; if(e.phaseId===pf.phase.id && e.cbdDrops!=null) c[e.cbdDrops]=(c[e.cbdDrops]||0)+1; });
+  var best=null; Object.keys(c).forEach(function(k){ if(best===null||c[k]>c[best]) best=k; }); return best!=null?{drops:+best,n:c[best]}:null;
+}
+function lightOf(e){
+  if(e.outdoorLight10min!=null) return {v:e.outdoorLight10min,auto:false};
+  if(e.morningBlock==='bike'||e.morningBlock==='walkOutside') return {v:true,auto:true};
+  return {v:null,auto:false};
+}
+
+/* ================= stavební prvky ================= */
+function row(label,hint,ctl,opts){
+  var r=document.createElement('div'); r.className='item'+((opts&&opts.inline)?' inline':'')+((opts&&opts.stack)?' stack':'');
+  var l=document.createElement('div');
+  l.innerHTML='<div class="lab">'+esc(label)+'</div>'+(hint?'<div class="hint'+(hint.cls?' '+hint.cls:'')+'">'+esc(hint.text||hint)+'</div>':'');
+  r.appendChild(l); if(ctl) r.appendChild(ctl); return r;
+}
+function tri(k){
+  var e=rec(cur), v=e[k], g=document.createElement('div'); g.className='tri';
+  [['ano',true,'y'],['ne',false,'n']].forEach(function(o){
+    var b=document.createElement('button'); b.textContent=o[0]; b.className=o[2];
+    b.setAttribute('aria-pressed', v===o[1]?'true':'false');
+    b.addEventListener('click',function(){ setVal(cur,k, v===o[1]?null:o[1]); renderDay(); touch(); });
+    g.appendChild(b);
+  }); return g;
+}
+function scale(k,lo,hi,pain){
+  var e=rec(cur), v=e[k], g=document.createElement('div'); g.className='scale'+(pain?' pain':'');
+  for(var n=lo;n<=hi;n++)(function(n){
+    var b=document.createElement('button'); b.textContent=n;
+    b.setAttribute('aria-pressed', v===n?'true':'false');
+    b.addEventListener('click',function(){ setVal(cur,k, v===n?null:n); renderDay(); touch(); });
+    g.appendChild(b);
+  })(n); return g;
+}
+function choice(k,options){
+  var e=rec(cur), v=e[k], g=document.createElement('div'); g.className='opts';
+  options.forEach(function(o){
+    var b=document.createElement('button'); b.className='opt'; b.textContent=o[1];
+    b.setAttribute('aria-pressed', v===o[0]?'true':'false');
+    b.addEventListener('click',function(){ setVal(cur,k, v===o[0]?null:o[0]); renderDay(); touch(); });
+    g.appendChild(b);
+  }); return g;
+}
+function timeInput(k){
+  var e=rec(cur), i=document.createElement('input'); i.type='time'; i.value=e[k]||'';
+  i.addEventListener('change',function(){ setVal(cur,k,i.value||null); renderDay(); touch(); });
+  return i;
+}
+function hintTime(ok,text){ return {text:text, cls: ok===null?'':(ok?'ok':'no')}; }
+
+/* ================= DNES ================= */
+function renderDay(){
+  var pf=phaseFor(cur), e=rec(cur), day=wd(cur);
+  document.getElementById('dateStr').textContent=fmtFull(cur);
+  document.getElementById('dayLabel').textContent=(cur===today()?'dnes · ':cur===shift(today(),-1)?'včera · ':'')+DNY[day];
+  document.getElementById('nextDay').disabled=cur>=today(); document.getElementById('nextDay').style.opacity=cur>=today()?.35:1;
+
+  var badge=document.getElementById('phaseBadge');
+  if(pf.before){ badge.innerHTML='před startem · '+fmt(settings.startDate); }
+  else { badge.innerHTML='Fáze '+pf.phase.id+' · týden '+pf.weekInPhase+(pf.arm!=='none'?' <span class="arm">'+pf.arm+'</span>':''); }
+
+  var rules=document.getElementById('phaseRules');
+  if(pf.before){ rules.innerHTML='<b>Protokol začíná '+fmtFull(settings.startDate)+'.</b> Do té doby se dá zapisovat, ale bez pravidel fáze.'; }
+  else {
+    var ph=pf.phase, mr=mealRule(pf), lr=lemonRule(pf);
+    rules.innerHTML='<b>'+esc(ph.name)+(pf.arm!=='none'?' · rameno '+pf.arm:'')+'</b><br>'
+      +'Citron: '+(lr?'ano':'<b>ne</b>')+' · Jídlo: '+(mr==='protein'?'<b>bílkovinová snídaně do 2 h</b>':'půst do 12:00')
+      +' · Alkohol: '+esc(ph.alcohol);
+  }
+
+  /* ---- Ráno ---- */
+  var m=document.getElementById('secMorning'); m.innerHTML='';
+  m.appendChild(row('Čas probuzení','potřebný pro kávu a světlo',timeInput('wakeTime'),{inline:true}));
+  var wa=weightAvg(cur), wHint = wa.avg!=null ? ('7denní průměr '+fw(wa.avg)+' kg · cíl '+fw(settings.targetWeightKg)+' kg') : 'po WC, před vodou a jídlem · průměr od 3 hodnot';
+  m.appendChild(row('Váha',wHint,numInput('weightKg',0.1,'kg','92px'),{inline:true}));
+  m.appendChild(row('Teplá voda',null,tri('warmWater')));
+  var lr2=lemonRule(pf);
+  m.appendChild(row('S citronem', lr2===false?{text:'v tomhle týdnu má být BEZ citronu',cls:'no'}:(lr2===true?'podle fáze: s citronem':null), tri('lemon')));
+  m.appendChild(row('Ranní blok','cíl: každý den něco jiného než nic',
+    choice('morningBlock',[['bike','kolo'],['walkOutside','chůze venku'],['pranamat','pranamat'],['other','jiná'],['none','nic']]),{stack:true}));
+  var L=lightOf(e);
+  var lightCtl=tri('outdoorLight10min');
+  if(L.auto){ lightCtl=document.createElement('div'); lightCtl.className='opts'; var a=document.createElement('button'); a.className='opt auto'; a.setAttribute('aria-pressed','true'); a.textContent='splněno automaticky'; a.disabled=true; lightCtl.appendChild(a); }
+  m.appendChild(row('Světlo venku ≥ 10 min','do 60 min po probuzení',lightCtl));
+  var wake=tmin(e.wakeTime), fc=tmin(e.firstCoffee), okC=(wake!=null&&fc!=null)?(fc-wake>=60):null;
+  m.appendChild(row('První káva',hintTime(okC, okC===null?'≥ 60 min po probuzení':(okC?(fc-wake)+' min po probuzení — splněno':(fc-wake)+' min po probuzení — brzo')),timeInput('firstCoffee'),{inline:true}));
+  var mr2=mealRule(pf), fm=tmin(e.firstMeal), okM=null, mText;
+  if(mr2==='protein'){ okM=(wake!=null&&fm!=null)?(fm-wake<=120):null; mText= okM===null?'do 2 h po probuzení, s bílkovinou':(okM?'v limitu':'později než 2 h'); }
+  else { okM=(fm!=null)?(fm>=12*60||e.morningBlock==='bike'):null; mText= okM===null?'od 12:00 (po ranním kole hned po jízdě)':(okM?'splněno':'před polednem'); }
+  m.appendChild(row('První jídlo',hintTime(okM,mText),timeInput('firstMeal'),{inline:true}));
+  if(mr2==='protein') m.appendChild(row('Snídaně s bílkovinou',null,tri('proteinBreakfast')));
+
+  /* ---- Den ---- */
+  var d=document.getElementById('secDay'); d.innerHTML='';
+  var lc=tmin(e.lastCoffee), okL=lc!=null?(lc<=14*60):null;
+  d.appendChild(row('Poslední káva',hintTime(okL, okL===null?'do 14:00':(okL?'splněno':'po 14:00')),timeInput('lastCoffee'),{inline:true}));
+  var wk=weekCount(cur,'strengthTraining');
+  d.appendChild(row('Silový trénink',{text:'tento týden '+wk+'/2 · program od fyzioterapeuta'},tri('strengthTraining')));
+  if(e.strengthTraining===true){ var sn=document.createElement('input'); sn.type='text'; sn.placeholder='poznámka k tréninku (nepovinné)'; sn.value=e.strengthNote||''; sn.addEventListener('input',function(){ setVal(cur,'strengthNote',sn.value.trim()||null); touch(); }); d.appendChild(row('',null,sn,{stack:true})); }
+  d.appendChild(row('Rizikový sport','hokej, wake, pivoty, dopady — jen evidence',tri('riskSport')));
+
+  /* ---- Večer ---- */
+  var v=document.getElementById('secEvening'); v.innerHTML='';
+  var alcWrap=document.createElement('div'); alcWrap.style.width='100%';
+  var units=e.alcoholUnits!=null?e.alcoholUnits:null;
+  var tot=document.createElement('div'); tot.className='alc-total'; tot.textContent= units==null?'nezaznamenáno':(Math.round(units*10)/10).toString().replace('.',',')+' j.';
+  var q=document.createElement('div'); q.className='quick';
+  [['0 j.',0,'set'],['+ pivo 0,5 l',1.6],['+ pivo 0,3 l',1],['+ víno 1 dl',1],['+ panák 3 cl',1]].forEach(function(o){
+    var b=document.createElement('button'); b.textContent=o[0];
+    b.addEventListener('click',function(){ var base=(o[2]==='set')?0:(units||0); setVal(cur,'alcoholUnits', o[2]==='set'?0:Math.round((base+o[1])*10)/10); renderDay(); touch(); });
+    q.appendChild(b);
+  });
+  var clr=document.createElement('button'); clr.className='clr'; clr.textContent='vymazat'; clr.addEventListener('click',function(){ setVal(cur,'alcoholUnits',null); renderDay(); touch(); }); q.appendChild(clr);
+  alcWrap.appendChild(tot); alcWrap.appendChild(q);
+  v.appendChild(row('Alkohol','1 j. = 10 g etanolu · 0,5 l dvanáctky = 1,6 j.',alcWrap,{stack:true}));
+  v.appendChild(row('Fastfood / těžké tučné jídlo',null,tri('fastFood')));
+  var lm=tmin(e.lastMeal), bt=tmin(e.bedTime), gapTxt='informativně: ≥ 3 h před spaním';
+  if(lm!=null&&bt!=null){ var g=(bt-lm+1440)%1440; gapTxt='rozestup do ulehnutí '+Math.floor(g/60)+' h '+(g%60)+' min'; }
+  v.appendChild(row('Poslední jídlo',gapTxt,timeInput('lastMeal'),{inline:true}));
+  v.appendChild(row('Hořčík večer',null,tri('magnesium')));
+  var cm=cbdMode(cur), cHint = cm ? ('v této fázi zatím nejčastěji '+cm.drops+' '+(cm.drops===1?'kapka':cm.drops<5?'kapky':'kapek')+' — dávku během fáze neměnit') : 'CBCium 1000 full-spectrum · dávku během fáze neměnit';
+  v.appendChild(row('CBD kapky',cHint,numInput('cbdDrops',1,'kapek','84px'),{inline:true}));
+  v.appendChild(row('Žáha','0 nic · 1 mírná · 2 obtěžující · 3 silná / budila',scale('heartburn',0,3)));
+  if(e.heartburn>0) v.appendChild(row('Kdy',null,choice('heartburnWhen',[['afterMeal','po jídle'],['night','v noci'],['other','jindy']])));
+  v.appendChild(row('Koleno','bolest za den 0–10',scale('kneePain',0,10,true),{stack:true}));
+  v.appendChild(row('Záda','bolest za den 0–10',scale('backPain',0,10,true),{stack:true}));
+  v.appendChild(row('Energie','1 nejhůř · 5 nejlíp',scale('energy',1,5)));
+  v.appendChild(row('Nálada',null,scale('mood',1,5)));
+
+  /* ---- Pá/So ---- */
+  var wCard=document.getElementById('cardWeekend'), w=document.getElementById('secWeekend'); w.innerHTML='';
+  if(day===4||day===5){
+    wCard.classList.remove('hidden');
+    w.appendChild(row('Čas ulehnutí',null,timeInput('bedTime'),{inline:true}));
+    w.appendChild(row('Čas posledního alkoholu',null,timeInput('lastAlcoholTime'),{inline:true}));
+    w.appendChild(row('Jídlo po 21:00',null,tri('foodAfter21')));
+  } else wCard.classList.add('hidden');
+
+  document.getElementById('note').value=e.note||'';
+  renderFoot();
+}
+function weekCount(dateStr,k){
+  var mon=monday(dateStr), n=0;
+  for(var i=0;i<7;i++){ var d=shift(mon,i); if(rec(d)[k]===true) n++; }
+  return n;
+}
+var saveTimer=null;
+function touch(){ clearTimeout(saveTimer); saveTimer=setTimeout(function(){ persist(true); },700); }
+function persist(quiet){
+  var e=records[cur]||(records[cur]={date:cur});
+  var n=document.getElementById('note').value.trim(); if(n) e.note=n; else delete e.note;
+  var pf=phaseFor(cur); e.phaseId=pf.phase?pf.phase.id:null; e.weekArm=pf.arm;
+  if(!e.createdAt) e.createdAt=new Date().toISOString();
+  e.updatedAt=new Date().toISOString();
+  var ok=save('records',records);
+  var m=document.getElementById('saveMsg'); m.className='msg'+(ok?' ok':' err');
+  m.textContent= ok?'Uloženo':'Uložení selhalo — udělejte export.';
+  if(ok) setTimeout(function(){ if(m.textContent==='Uloženo') m.textContent=''; },1200);
+  renderFoot();
+}
+function renderFoot(){
+  var n=Object.keys(records).length, parts=[n+' '+(n===1?'zapsaný den':(n<5?'zapsané dny':'zapsaných dnů'))];
+  if(!useLocal) parts.push('POZOR: prohlížeč neukládá');
+  parts.push('data zůstávají v telefonu');
+  document.getElementById('foot').innerHTML=parts.join(' · ');
+}
+document.getElementById('note').addEventListener('input',touch);
+document.getElementById('prevDay').addEventListener('click',function(){ persist(true); cur=shift(cur,-1); renderDay(); });
+document.getElementById('nextDay').addEventListener('click',function(){ if(cur>=today())return; persist(true); cur=shift(cur,1); renderDay(); });
+
+/* ================= TÝDEN ================= */
+function mean(a){ var v=a.filter(function(x){return x!=null;}); return v.length? v.reduce(function(s,x){return s+x;},0)/v.length : null; }
+function pct(a,b){ return b? Math.round(a/b*100)+' %':'—'; }
+function weekStats(mon){
+  var days=[]; for(var i=0;i<7;i++) days.push(shift(mon,i));
+  var recs=days.map(function(d){return records[d];}).filter(Boolean);
+  var n=recs.length, cnt=function(f){ return recs.filter(f).length; };
+  var okCoffee=recs.filter(function(e){var w=tmin(e.wakeTime),c=tmin(e.firstCoffee);return w!=null&&c!=null;});
+  var okLast=recs.filter(function(e){return e.lastCoffee;});
+  var alc=recs.map(function(e){return e.alcoholUnits;}).filter(function(x){return x!=null;});
+  var blocks={bike:0,walkOutside:0,pranamat:0,other:0,none:0}; recs.forEach(function(e){ if(e.morningBlock) blocks[e.morningBlock]++; });
+  return {
+    mon:mon, n:n,
+    entry:pct(recs.filter(eveningDone).length,7),
+    weight:mean(recs.map(function(e){return e.weightKg;})), weightN:recs.filter(function(e){return e.weightKg!=null;}).length,
+    water:pct(cnt(function(e){return e.warmWater===true;}),cnt(function(e){return e.warmWater!=null;})),
+    light:pct(cnt(function(e){return lightOf(e).v===true;}),cnt(function(e){return lightOf(e).v!=null;})),
+    coffee60:pct(okCoffee.filter(function(e){return tmin(e.firstCoffee)-tmin(e.wakeTime)>=60;}).length, okCoffee.length),
+    coffee14:pct(okLast.filter(function(e){return tmin(e.lastCoffee)<=840;}).length, okLast.length),
+    mg:pct(cnt(function(e){return e.magnesium===true;}),cnt(function(e){return e.magnesium!=null;})),
+    strength:cnt(function(e){return e.strengthTraining===true;}),
+    blocks:blocks,
+    alcSum:alc.length?alc.reduce(function(s,x){return s+x;},0):null, alcDays:alc.filter(function(x){return x>0;}).length, alcMax:alc.length?Math.max.apply(null,alc):null, alcKnown:alc.length,
+    hbDays:cnt(function(e){return e.heartburn>0;}), hbMean:mean(recs.map(function(e){return e.heartburn;})), hbNight:cnt(function(e){return e.heartburn>0&&e.heartburnWhen==='night';}),
+    knee:mean(recs.map(function(e){return e.kneePain;})), kneeMax:Math.max.apply(null,recs.map(function(e){return e.kneePain;}).filter(function(x){return x!=null;}).concat([-1])),
+    back:mean(recs.map(function(e){return e.backPain;})), backMax:Math.max.apply(null,recs.map(function(e){return e.backPain;}).filter(function(x){return x!=null;}).concat([-1])),
+    energy:mean(recs.map(function(e){return e.energy;})), mood:mean(recs.map(function(e){return e.mood;})),
+    byDay:days.map(function(d){ var e=records[d]||{}; return {d:d,energy:e.energy,mood:e.mood}; })
+  };
+}
+function renderWeek(){
+  var body=document.getElementById('weekBody'); body.innerHTML='';
+  var thisMon=monday(today()), weeks=[]; for(var i=3;i>=0;i--) weeks.push(weekStats(shift(thisMon,-7*i)));
+  var hdr=weeks.map(function(w,i){ return '<th>'+(i===3?'tento':fmt(w.mon))+'</th>'; }).join('');
+  function tr(label,f){ return '<tr><td>'+label+'</td>'+weeks.map(function(w,i){return '<td'+(i===3?' class="cur"':'')+'>'+f(w)+'</td>';}).join('')+'</tr>'; }
+  var html='';
+  html+='<div class="card pad"><div class="card-h"><h2>Dodržování</h2><span class="n">% z dnů se záznamem</span></div><table><tr><th>položka</th>'+hdr+'</tr>'
+    +tr('Zápis proveden (večer)',function(w){return w.entry;})
+    +tr('Teplá voda',function(w){return w.water;})
+    +tr('Světlo ráno',function(w){return w.light;})
+    +tr('Káva ≥ 60 min',function(w){return w.coffee60;})
+    +tr('Káva ≤ 14:00',function(w){return w.coffee14;})
+    +tr('Hořčík',function(w){return w.mg;})
+    +tr('Silový trénink',function(w){return w.strength+'/2';})
+    +'</table></div>';
+  html+='<div class="card pad"><div class="card-h"><h2>Ranní blok</h2><span class="n">počet dnů</span></div><table><tr><th></th>'+hdr+'</tr>'
+    +tr('Kolo',function(w){return w.blocks.bike;})+tr('Chůze venku',function(w){return w.blocks.walkOutside;})
+    +tr('Pranamat',function(w){return w.blocks.pranamat;})+tr('Jiná',function(w){return w.blocks.other;})+tr('Nic',function(w){return w.blocks.none;})+'</table></div>';
+  html+='<div class="card pad"><div class="card-h"><h2>Alkohol</h2><span class="n">jednotky</span></div><table><tr><th></th>'+hdr+'</tr>'
+    +tr('Součet',function(w){return f1(w.alcSum);})+tr('Dnů s alkoholem',function(w){return w.alcKnown?w.alcDays+' z '+w.alcKnown:'—';})+tr('Max v jednom dni',function(w){return f1(w.alcMax);})+'</table></div>';
+  html+='<div class="card pad"><div class="card-h"><h2>Žáha a bolest</h2><span class="n">průměr · max</span></div><table><tr><th></th>'+hdr+'</tr>'
+    +tr('Žáha — dnů',function(w){return w.hbDays;})+tr('Žáha — průměr',function(w){return f1(w.hbMean);})+tr('Žáha — v noci',function(w){return w.hbNight;})
+    +tr('Koleno',function(w){return f1(w.knee)+(w.kneeMax>=0?' · '+w.kneeMax:'');})+tr('Záda',function(w){return f1(w.back)+(w.backMax>=0?' · '+w.backMax:'');})+'</table></div>';
+  /* váha: 4 týdny + graf od startu */
+  var allWeeks=[]; for(var mm=monday(settings.startDate); mm<=thisMon; mm=shift(mm,7)){ var ws=weekStats(mm); allWeeks.push({mon:mm,avg:ws.weightN>=3?ws.weight:null,n:ws.weightN}); }
+  var wvals=allWeeks.map(function(x){return x.avg;}).filter(function(x){return x!=null;});
+  html+='<div class="card pad"><div class="card-h"><h2>Váha</h2><span class="n">7denní průměr · cíl '+fw(settings.targetWeightKg)+' kg</span></div><table><tr><th></th>'+hdr+'</tr>'
+    +tr('Průměr týdne',function(w){return w.weightN>=3?fw(w.weight):(w.weightN?'('+w.weightN+' hodn.)':'—');})
+    +'<tr><td>Změna proti předchozímu</td>'+weeks.map(function(w,i){ var prev=weeks[i-1]; var ok=w.weightN>=3&&prev&&prev.weightN>=3; return '<td'+(i===3?' class="cur"':'')+'>'+(ok?fwsign(w.weight-prev.weight):'—')+'</td>'; }).join('')+'</tr>'
+    +tr('Od cíle',function(w){return w.weightN>=3?fwsign(w.weight-settings.targetWeightKg):'—';})
+    +'</table>';
+  if(wvals.length){
+    var lo=Math.min.apply(null,wvals.concat([settings.targetWeightKg]))-0.5, hi=Math.max.apply(null,wvals.concat([settings.targetWeightKg]))+0.5;
+    html+='<p class="dim" style="font-size:.76rem;margin:12px 0 0">Týdenní průměry od startu · čárkovaně cíl</p><div class="bars" style="height:84px;position:relative">'
+      +'<div style="position:absolute;left:0;right:0;border-top:1px dashed var(--warm);top:'+(100-(settings.targetWeightKg-lo)/(hi-lo)*100)+'%"></div>'
+      +allWeeks.map(function(x){ var h=x.avg!=null?((x.avg-lo)/(hi-lo)*74+6):2; return '<div class="bar"><b>'+(x.avg!=null?fw(x.avg):'')+'</b><i style="height:'+h+'px'+(x.avg==null?';opacity:.25':'')+'"></i><span>'+fmt(x.mon)+'</span></div>'; }).join('')
+      +'</div><p class="dim" style="font-size:.74rem;margin-top:6px">Kolísání ±1–2 kg ze dne na den je voda a glykogen, ne tuk. Proto jen průměry a žádná predikce.</p>';
+  } else {
+    html+='<p class="dim" style="font-size:.78rem;margin-top:10px">Graf se ukáže, až bude aspoň jeden týden se třemi váženími.</p>';
+  }
+  html+='</div>';
+
+  var cw=weeks[3];
+  html+='<div class="card pad"><div class="card-h"><h2>Energie a nálada</h2><span class="n">průměr 1–5</span></div><table><tr><th></th>'+hdr+'</tr>'
+    +tr('Energie',function(w){return f1(w.energy);})+tr('Nálada',function(w){return f1(w.mood);})+'</table>'
+    +'<p class="dim" style="font-size:.76rem;margin:12px 0 0">Energie tento týden po dnech (víkend zvýrazněn)</p><div class="bars">'
+    +cw.byDay.map(function(x,i){ var h=x.energy?(x.energy/5*54+6):2; return '<div class="bar"><b>'+(x.energy||'')+'</b><i class="'+(i>=5?'we':'')+'" style="height:'+h+'px"></i><span>'+DNY_K[i]+'</span></div>'; }).join('')
+    +'</div></div>';
+
+  var pf=phaseFor(today());
+  if(pf.phase && pf.phase.alt){
+    var ph=pf.phase, k=ph.primary, A=[], B=[];
+    Object.keys(records).forEach(function(d){ var e=records[d]; if(e.phaseId===ph.id && e[k]!=null){ (e.weekArm==='A'?A:B).push(e[k]); } });
+    var wA=new Set(), wB=new Set(); Object.keys(records).forEach(function(d){ var e=records[d]; if(e.phaseId===ph.id){ (e.weekArm==='A'?wA:wB).add(monday(d)); } });
+    if(pf.weekInPhase>=4 && A.length&&B.length){
+      html+='<div class="card pad"><div class="card-h"><h2>'+esc(ph.name)+': A vs B</h2><span class="n">'+esc(ph.primaryLabel)+'</span></div>'
+        +'<table><tr><th></th><th>A</th><th>B</th></tr><tr><td>'+esc(ph.armA)+' / '+esc(ph.armB)+'</td><td>'+f1(mean(A))+'</td><td>'+f1(mean(B))+'</td></tr>'
+        +'<tr><td>dnů</td><td>'+A.length+'</td><td>'+B.length+'</td></tr></table>'
+        +'<div class="note warm" style="margin:12px 0 0"><b>'+wA.size+' vs '+wB.size+' týdny — orientační, nikoli průkazné.</b> Na skutečný závěr je potřeba víc střídání.</div></div>';
+    } else {
+      html+='<div class="note acc"><b>'+esc(ph.name)+', týden '+pf.weekInPhase+' ze 4.</b> Srovnání A vs B se ukáže až od 4. týdne fáze. Do té doby jen popisné souhrny.</div>';
+    }
+  }
+  html+='<p class="dim" style="font-size:.76rem;text-align:center;margin-top:8px">Vynechaný den je jen chybějící hodnota. Žádné normy, žádné série.</p>';
+  body.innerHTML=html;
+}
+
+/* ================= FÁZE ================= */
+function renderPhases(){
+  var pf=phaseFor(today()), list=document.getElementById('phaseList'); list.innerHTML='';
+  PHASES.forEach(function(ph,i){
+    var s=shift(settings.startDate,i*28), e=ph.id<4?shift(settings.startDate,i*28+27):null;
+    var div=document.createElement('div'); div.className='ph'+((pf.phase&&pf.phase.id===ph.id)?' cur':'');
+    div.innerHTML='<div class="t"><b>Fáze '+ph.id+' — '+esc(ph.name)+'</b><span>'+fmt(s)+(e?' – '+fmt(e):' →')+'</span></div><ul>'+ph.bullets.map(function(b){return '<li>'+esc(b)+'</li>';}).join('')+'</ul>';
+    list.appendChild(div);
+  });
+  var tw=document.getElementById('targetW'); tw.value=settings.targetWeightKg;
+  tw.onchange=function(){ var v=parseFloat(String(tw.value).replace(',','.')); if(v>0){ settings.targetWeightKg=Math.round(v*10)/10; save('settings',settings); renderAll(); } };
+  var sd=document.getElementById('startDate'); sd.value=settings.startDate;
+  sd.onchange=function(){ if(sd.value){ settings.startDate=sd.value; save('settings',settings); renderAll(); } };
+  var ov=document.getElementById('phaseOverride'); ov.innerHTML='';
+  [[null,'podle data'],[1,'1'],[2,'2'],[3,'3'],[4,'4']].forEach(function(o){
+    var b=document.createElement('button'); b.className='opt'; b.textContent=o[1];
+    b.setAttribute('aria-pressed', settings.phaseOverride===o[0]?'true':'false');
+    b.addEventListener('click',function(){ settings.phaseOverride=o[0]; save('settings',settings); renderAll(); });
+    ov.appendChild(b);
+  });
+}
+
+/* ================= ÚKOLY ================= */
+function defaultTasks(){
+  var s=settings.startDate;
+  return [
+    {id:'fyzio',title:'Fyzioterapeut: program na koleno (stehna, hýždě, lýtka, jednonožní práce) + posouzení zad',due:shift(s,6),done:false},
+    {id:'krev',title:'Praktický lékař: krevní obraz — ferritin, vitamin D, TSH, B12, glykémie, jaterní testy',due:shift(s,13),done:false,
+     flag:'Nahlásit lékaři denní CBD full-spectrum i dosavadní příjem alkoholu — obojí ovlivňuje jaterní testy a jejich výklad.'},
+    {id:'gastro',title:'Praktik → gastroenterolog: chronická žáha (posoudit indikaci gastroskopie)',due:shift(s,27),done:false,
+     flag:'Červená vlajka: bolest při polykání, nechtěný úbytek váhy, krev, žáha budící opakovaně v noci → k lékaři hned, nečekat na termín.'},
+    {id:'oura',title:'Rozhodnutí o trackeru (Oura) na základě týdenního přehledu',due:shift(s,41),done:false}
+  ];
+}
+if(!tasks){ tasks=defaultTasks(); save('tasks',tasks); }
+else { /* migrace: texty a vlajky z aktuální specifikace, stav hotovo zůstává */
+  var defs=defaultTasks(); defs.forEach(function(d){ var ex=tasks.find(function(t){return t.id===d.id;});
+    if(ex){ ex.title=d.title; if(d.flag) ex.flag=d.flag; } else tasks.push(d); }); save('tasks',tasks); }
+function renderTasks(){
+  var list=document.getElementById('taskList'); list.innerHTML='';
+  tasks.forEach(function(t){
+    var d=document.createElement('div'); d.className='task'+(t.done?' done':'');
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!t.done;
+    cb.addEventListener('change',function(){ t.done=cb.checked; t.doneAt=cb.checked?new Date().toISOString():null; save('tasks',tasks); renderTasks(); });
+    var body=document.createElement('div');
+    var late = !t.done && t.due<today();
+    body.innerHTML='<div class="tt">'+esc(t.title)+'</div><div class="td">do '+fmtFull(t.due)+(late?' · <span style="color:var(--bad)">po termínu</span>':'')+'</div>'+(t.flag?'<div class="flag'+(t.id==='krev'?' info':'')+'">'+esc(t.flag)+'</div>':'');
+    d.appendChild(cb); d.appendChild(body); list.appendChild(d);
+  });
+}
+
+/* ================= EXPORT / IMPORT ================= */
+var COLS=['date','phaseId','weekArm','wakeTime','weightKg','warmWater','lemon','morningBlock','outdoorLight10min','firstCoffee','firstMeal','proteinBreakfast',
+  'lastCoffee','strengthTraining','strengthNote','riskSport','alcoholUnits','fastFood','lastMeal','magnesium','cbdDrops','heartburn','heartburnWhen',
+  'kneePain','backPain','energy','mood','bedTime','lastAlcoholTime','foodAfter21','note','createdAt','updatedAt'];
+function exportRows(){ return Object.keys(records).sort().map(function(d){ var e=Object.assign({},records[d]); var L=lightOf(e); if(L.auto) e.outdoorLight10min=true; return e; }); }
+function showOut(text,msg){ var ta=document.getElementById('expOut'); ta.value=text; ta.classList.remove('hidden'); ta.focus(); ta.select();
+  var m=document.getElementById('expMsg');
+  if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ m.className='msg ok'; m.textContent='Zkopírováno do schránky · '+msg; },function(){ m.className='msg'; m.textContent='Text je vybraný — zkopírujte ručně · '+msg; }); }
+  else { m.className='msg'; m.textContent='Text je vybraný — zkopírujte ručně · '+msg; }
+}
+document.getElementById('expJson').addEventListener('click',function(){
+  persist(true);
+  var rows=exportRows();
+  var payload={format:'protokol-2',schemaVersion:2,exportedAt:new Date().toISOString(),timezone:'Europe/Prague',
+    settings:settings,phases:PHASES.map(function(p){return {id:p.id,name:p.name,alternating:p.alt,primary:p.primary};}),tasks:tasks,entryCount:rows.length,
+    conventions:{date:'Kalendářní den, kterého se záznam týká.',missing:'Chybějící klíč = nezaznamenáno. Nesmí se počítat jako ne ani jako 0.',
+      bools:'true = ano, false = vědomé ne.',outdoorLight10min:'Při ranním bloku kolo/chůze venku automaticky true.',
+      alcoholUnits:'1 jednotka = 10 g etanolu. 0 = vědomě nic; chybí = nezaznamenáno.',
+      weightKg:'Ranní vážení za stálých podmínek. Vyhodnocuje se jen 7denní průměr; denní hodnota se nekomentuje. Cíl v settings.targetWeightKg.',
+      cbdDrops:'Skutečný počet kapek CBCium 1000 full-spectrum. Dávka se během fáze nemá měnit.',
+      entryDone:'Den se počítá jako zapsaný, až když je vyplněná sekce Večer (energie nebo nálada).',weekArm:'A/B jen v testovacích fázích, jinak none.',
+      pairing:'Biometrie z wearable se páruje podle date; noc patří ke dni probuzení.'},
+    entries:rows};
+  showOut(JSON.stringify(payload,null,1), rows.length+' dnů');
+});
+document.getElementById('expCsv').addEventListener('click',function(){
+  persist(true);
+  var rows=exportRows();
+  var q=function(v){ if(v==null) return ''; var s=String(v); return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+  var csv=[COLS.join(';')].concat(rows.map(function(e){ return COLS.map(function(c){ var v=e[c]; if(typeof v==='number') v=String(v).replace('.',','); return q(v); }).join(';'); })).join('\n');
+  showOut(csv, rows.length+' řádků · oddělovač ; · desetinná čárka');
+});
+document.getElementById('impBtn').addEventListener('click',function(){
+  var m=document.getElementById('impMsg');
+  try{
+    var j=JSON.parse(document.getElementById('impIn').value);
+    if(!j.entries) throw new Error('chybí entries');
+    var added=0, updated=0;
+    j.entries.forEach(function(e){ if(!e.date) return; var ex=records[e.date];
+      if(!ex){ records[e.date]=e; added++; }
+      else if((e.updatedAt||'')>(ex.updatedAt||'')){ records[e.date]=e; updated++; } });
+    if(j.tasks) j.tasks.forEach(function(t){ var ex=tasks.find(function(x){return x.id===t.id;}); if(ex&&t.done&&!ex.done){ ex.done=true; ex.doneAt=t.doneAt; } });
+    save('records',records); save('tasks',tasks);
+    m.className='msg ok'; m.textContent='Načteno: '+added+' nových, '+updated+' aktualizovaných dnů.'; document.getElementById('impIn').value=''; renderAll();
+  }catch(err){ m.className='msg err'; m.textContent='Nepodařilo se načíst: '+err.message; }
+});
+document.getElementById('testBtn').addEventListener('click',function(){
+  var m=document.getElementById('testMsg');
+  if(!useLocal){ m.className='msg err'; m.textContent='NEUKLÁDÁ SE. Používejte export.'; return; }
+  try{ var v=String(Date.now()); localStorage.setItem('p2.probe',v); var ok=localStorage.getItem('p2.probe')===v; localStorage.removeItem('p2.probe');
+    if(!ok) throw 0; m.className='msg ok'; m.textContent='V pořádku — ukládá se. Zavřete a otevřete znovu, data tam budou.'; }
+  catch(e){ m.className='msg err'; m.textContent='NEUKLÁDÁ SE. Používejte export.'; }
+});
+
+/* ================= záložky ================= */
+var TABS=['dnes','tyden','faze','ukoly','export'];
+function showTab(name){
+  TABS.forEach(function(t){ document.getElementById('tab-'+t).classList.toggle('hidden',t!==name); });
+  document.querySelectorAll('.tabs button').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.tab===name?'true':'false'); });
+  if(name==='tyden') renderWeek(); if(name==='faze') renderPhases(); if(name==='ukoly') renderTasks();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tabs button').forEach(function(b){ b.addEventListener('click',function(){ if(b.dataset.tab!=='dnes') persist(true); showTab(b.dataset.tab); }); });
+
+function renderAll(){ renderDay(); renderPhases(); renderTasks(); }
+document.getElementById('storageWarn').classList.toggle('hidden',useLocal);
+renderAll(); showTab('dnes');
+})();
+</script>
